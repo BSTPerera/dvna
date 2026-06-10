@@ -40,3 +40,21 @@ app.use('/',require('./routes/main')(passport))
 
 // Start Server
 app.listen(config.port, config.listen)
+
+var db = require('./models')
+var bcrypt = require('bcrypt-nodejs')
+db.sequelize.sync().then(function () {
+    db.User.findOrCreate({
+        where: { login: 'admin' },
+        defaults: {
+            name:     'Administrator',
+            login:    'admin',
+            email:    'admin@dvna.test',
+            password: bcrypt.hashSync('admin123', bcrypt.genSaltSync(10)),
+            role:     'admin'
+        }
+    }).spread(function (user, created) {
+        if (created) { console.log('[SEED] Default user created: admin / admin123') }
+        else         { console.log('[SEED] Default user already exists') }
+    })
+})
